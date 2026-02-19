@@ -21,6 +21,6 @@
 #-renamesourcefileattribute SourceFile
 
 # Keep library penting supaya tidak crash setelah obfuscation
--keep class retrofit2.** { *; }
--keep class com.google.gson.** { *; }
--keep class androidx.lifecycle.** { *; }
+#-keep class retrofit2.** { *; }
+#-keep class com.google.gson.** { *; }
+#-keep class androidx.lifecycle.** { *; }

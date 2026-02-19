@@ -13,7 +13,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.volumeKita.Screen.BottomBarMain
 import com.example.volumeKita.Screen.NAVIGATION_MAIN
 import com.example.volumeKita.Screen.ScreenGraph
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

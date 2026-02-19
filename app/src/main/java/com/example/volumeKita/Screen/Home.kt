@@ -30,6 +30,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 import com.example.volumeKita.CostumeUi.LoadingScreen
 import com.example.volumeKita.CostumeUi.VolumeBarHorizontal
+import com.example.volumeKita.Event.EventMain
+import com.example.volumeKita.State.MainState
 import com.example.volumeKita.ViewModel.MainViewModel
 import com.example.volumeKita.ui.theme.MyShapes
 import com.example.volumeKita.R as _R
@@ -37,16 +39,25 @@ import com.example.volumeKita.R as _R
 
 @Composable
 fun Home(navController: NavHostController,modifier: Modifier = Modifier,viewModel: MainViewModel) {
+    
+    val stateUi by  viewModel.uiState.collectAsState()
+
     HomeUi(
-        modifier = modifier
+        modifier = modifier,
+        eventMain = viewModel::onEvent,
+        stateUi = stateUi
     )
 }
 
 @Composable
-fun HomeUi(modifier: Modifier = Modifier,loadingScreen: Boolean = false) {
-    val scrollMain = rememberScrollState()
-    
+fun HomeUi(
+    modifier: Modifier = Modifier,
+    loadingScreen: Boolean = false,
+    eventMain: (EventMain) -> Unit,
+    stateUi: MainState
+           ) {
 
+    val scrollMain = rememberScrollState()
     
     Column(
         modifier = modifier
@@ -65,13 +76,13 @@ fun HomeUi(modifier: Modifier = Modifier,loadingScreen: Boolean = false) {
                     .fillMaxWidth()
                     .wrapContentHeight(),
                 volumeSystem = 0.3f,
-                title = "Sound",
-                iconSound = painterResource(_R.drawable.sound),
+                title = "Music",
+                iconSound = painterResource(stateUi.musicIconResource),
                 onClickIcon = {
-
+                    eventMain(EventMain.onIconMusic)
                 },
                 onPointerInputVolume = {
-
+                    eventMain(EventMain.onTouchMusic(size))
                 }
             )
         }
@@ -87,12 +98,12 @@ fun HomeUi(modifier: Modifier = Modifier,loadingScreen: Boolean = false) {
                     .wrapContentHeight(),
                 volumeSystem = 0.3f,
                 title = "Notification",
-                iconSound = painterResource(_R.drawable.notification),
+                iconSound = painterResource(stateUi.notificationIconResource),
                 onClickIcon = {
-
+                    eventMain(EventMain.onIconNotification)
                 },
                 onPointerInputVolume = {
-
+                    eventMain(EventMain.onTouchNotification(size))
                 }
             )
         }
@@ -108,12 +119,12 @@ fun HomeUi(modifier: Modifier = Modifier,loadingScreen: Boolean = false) {
                     .wrapContentHeight(),
                 volumeSystem = 0.3f,
                 title = "Alarm",
-                iconSound = painterResource(_R.drawable.alarm),
+                iconSound = painterResource(stateUi.alarmIconResource),
                 onClickIcon = {
-
+                    eventMain(EventMain.onIconAlarm)
                 },
                 onPointerInputVolume = {
-
+                    eventMain(EventMain.onTouchAlarm(size))
                 }
             )
         }
@@ -132,5 +143,8 @@ fun HomeUi(modifier: Modifier = Modifier,loadingScreen: Boolean = false) {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewHome() {
-    HomeUi()
+    HomeUi(
+        eventMain = {},
+        stateUi = MainState()
+    )
 }
