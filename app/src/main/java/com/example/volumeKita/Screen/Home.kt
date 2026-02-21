@@ -1,5 +1,6 @@
 package com.example.volumeKita.Screen
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
@@ -56,7 +57,6 @@ fun HomeUi(
     eventMain: (EventMain) -> Unit,
     stateUi: MainState
            ) {
-
     val scrollMain = rememberScrollState()
     
     Column(
@@ -75,14 +75,17 @@ fun HomeUi(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight(),
-                volumeSystem = 0.3f,
+                volumeSystem = stateUi.soundMusic,
                 title = "Music",
                 iconSound = painterResource(stateUi.musicIconResource),
                 onClickIcon = {
                     eventMain(EventMain.onIconMusic)
                 },
-                onPointerInputVolume = {
-                    eventMain(EventMain.onTouchMusic(size))
+                onTouch = {size, offsetClicked ->
+                    eventMain(EventMain.onTouchMusic(size,offsetClicked))
+                },
+                onUpTouch = {size , offsetClicked ->
+                    eventMain(EventMain.onUpTouchMusic(size,offsetClicked))
                 }
             )
         }
@@ -96,14 +99,17 @@ fun HomeUi(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight(),
-                volumeSystem = 0.3f,
+                volumeSystem = stateUi.soundNotification,
                 title = "Notification",
                 iconSound = painterResource(stateUi.notificationIconResource),
                 onClickIcon = {
                     eventMain(EventMain.onIconNotification)
                 },
-                onPointerInputVolume = {
-                    eventMain(EventMain.onTouchNotification(size))
+                onTouch = {size, offsetClicked ->
+                    eventMain(EventMain.onTouchNotification(size,offsetClicked))
+                },
+                onUpTouch = {size , offsetClicked ->
+                    eventMain(EventMain.onUpTouchNotification(size,offsetClicked))
                 }
             )
         }
@@ -117,14 +123,17 @@ fun HomeUi(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight(),
-                volumeSystem = 0.3f,
+                volumeSystem = stateUi.soundAlarm,
                 title = "Alarm",
                 iconSound = painterResource(stateUi.alarmIconResource),
                 onClickIcon = {
                     eventMain(EventMain.onIconAlarm)
                 },
-                onPointerInputVolume = {
-                    eventMain(EventMain.onTouchAlarm(size))
+                onTouch = {size, offsetClicked ->
+                    eventMain(EventMain.onTouchAlarm(size,offsetClicked))
+                },
+                onUpTouch = {size , offsetClicked ->
+                    eventMain(EventMain.onUpTouchAlarm(size,offsetClicked))
                 }
             )
         }
@@ -147,4 +156,10 @@ private fun PreviewHome() {
         eventMain = {},
         stateUi = MainState()
     )
+}
+
+// system config
+
+fun Float.toFixed(target: Int): Float{
+    return (this * Math.pow(10.0,target.toDouble()).toInt() / Math.pow(10.0,target.toDouble()).toFloat())
 }

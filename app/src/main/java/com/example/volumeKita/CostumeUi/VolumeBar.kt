@@ -1,8 +1,11 @@
 package com.example.volumeKita.CostumeUi
 
+import android.R.attr.y
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -16,18 +19,25 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.example.volumeKita.R
 import com.example.volumeKita.ui.theme.MyShapes
@@ -39,7 +49,8 @@ fun VolumeBarHorizontal(
     volumeSystem: Float = 0f,
     iconSound: Painter,
     onClickIcon: () -> Unit,
-    onPointerInputVolume: PointerInputScope.() -> Unit
+    onTouch: (size: IntSize, offsetClicked: Offset) -> Unit,
+    onUpTouch: (size: IntSize, offsetClicked: Offset) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -73,12 +84,16 @@ fun VolumeBarHorizontal(
                     contentDescription = "No Sound"
                 )
             }
+
+            val newVolumeSystem = volumeSystem.toFixed(2)
+
             SoundControl(
                 modifier = Modifier
                     .height(56.dp)
                     .fillMaxWidth(),
-                volumeSystem = volumeSystem,
-                pointerInputSound = onPointerInputVolume
+                volumeSystem = newVolumeSystem,
+                onTouch = onTouch,
+                onUpTouch = onUpTouch
             )
         }
     }
@@ -92,36 +107,63 @@ private fun PreviewVolumeBarHorizontal() {
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight(),
-        volumeSystem = 0.3f,
+        volumeSystem = 1f,
         title = "Sound Game",
         iconSound = painterResource(R.drawable.sound),
         onClickIcon = {},
-        onPointerInputVolume = {}
+        onTouch = {size, offset ->
+
+        },
+        onUpTouch = {size, offset ->
+
+        }
     )
 }
 
 @Composable
-private fun SoundControl(modifier: Modifier = Modifier,volumeSystem: Float = 0f,pointerInputSound: PointerInputScope.() -> Unit) {
+private fun SoundControl(modifier: Modifier = Modifier,
+                         volumeSystem: Float = 0f,
+                         onTouch: (size: IntSize, offsetClicked: Offset) -> Unit,
+                         onUpTouch: (size: IntSize, offsetClicked: Offset) -> Unit
+) {
+
+    var lastDrag by remember {mutableStateOf(Offset(0f,0f))}
+
     Canvas(
         modifier = Modifier
-            .padding(3.dp)
+            .padding(horizontal = 15.dp)
             .pointerInput(Unit){
-                pointerInputSound()
+                detectDragGestures(
+                    onDragStart = {offset: Offset ->
+
+                    },
+                    onDrag = { change: PointerInputChange, dragAmount: Offset ->
+                        onTouch(size,change.position)
+                        lastDrag = change.position
+                            change.consume()
+                    },
+                    onDragEnd = {
+                        onUpTouch(size,lastDrag)
+                    }
+                )
             }
             .then(modifier)
-    ) { 
+    ) {
         val centerPositionHeight = size.height / 2
         drawLine(
             color = Color.Gray,
-            start = Offset(25f,centerPositionHeight),
+            start = Offset(5f,centerPositionHeight),
             end = Offset((size.width - 5),centerPositionHeight),
             strokeWidth = 5f,
             cap = StrokeCap.Round
         )
         drawLine(
             color = Color.Blue.copy(0.8f),
-            start = Offset(25f,centerPositionHeight),
-            end = Offset((size.width - 5) * volumeSystem,centerPositionHeight),
+            start = Offset(5f,centerPositionHeight),
+            end = Offset(
+                x = if(((size.width - 25) * volumeSystem) < 25) 25f else (size.width - 25) * volumeSystem,
+                y = centerPositionHeight
+            ),
             strokeWidth = 8f,
             cap = StrokeCap.Round
         )
@@ -129,7 +171,10 @@ private fun SoundControl(modifier: Modifier = Modifier,volumeSystem: Float = 0f,
             color = Color.Blue,
             startAngle = 90f,
             sweepAngle = 360f,
-            topLeft = Offset((size.width - 5) * volumeSystem,centerPositionHeight - 25f),
+            topLeft = Offset(
+                x = if(((size.width - 25) * volumeSystem) < 25f) 0f else (size.width - 25) * volumeSystem,
+                y = centerPositionHeight - 25f
+            ),
             size = Size(50f,50f),
             useCenter = true
         )
@@ -144,7 +189,19 @@ private fun PreviewSoundControl() {
         modifier = Modifier
             .height(56.dp)
             .fillMaxWidth(),
-        volumeSystem = 0.5f,
-        {}
+        volumeSystem = 0f,
+        onTouch = {size, offset ->
+
+        },
+        onUpTouch = {size, offset ->
+
+        }
     )
+}
+
+
+// system config
+
+fun Float.toFixed(target: Int): Float{
+    return (this * Math.pow(10.0,target.toDouble()).toInt() / Math.pow(10.0,target.toDouble()).toFloat())
 }

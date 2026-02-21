@@ -6,7 +6,7 @@ data class MainState(
     var isLoading: Boolean = false,
     var musicIconResource: Int = R.drawable.sound,
     var soundMusic: Float = 0.0f,
-    var maxSoundMusic: Float = 0.0f,
+    var maxSoundMusic: Float = 100.0f,
     var notificationIconResource: Int = R.drawable.notification,
     var soundNotification: Float = 0.0f,
     var maxSoundNotification: Float = 0.0f,

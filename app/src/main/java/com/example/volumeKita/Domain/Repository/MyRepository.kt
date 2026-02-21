@@ -4,7 +4,7 @@ import com.example.volumeKita.Data.ModelVolume
 import kotlinx.coroutines.flow.SharedFlow
 
 interface MyRepository{
-    val currentModelVolume: ModelVolume
+    var currentModelVolume: ModelVolume
     val modelVolume: SharedFlow<ModelVolume>
     fun setVolume(volume: Int,streamType: Int);
     fun refreshVolume();
