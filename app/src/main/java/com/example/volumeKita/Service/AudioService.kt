@@ -50,12 +50,17 @@ class AudioService: Service() {
     val serviceCoroutineIO = CoroutineScope(Dispatchers.IO)
 
     lateinit var observer: ContentObserver;
+    private var lastVolume: ModelVolume? = null
     override fun onCreate() {
         super.onCreate()
         val audioManager: AudioManager = getSystemService(AUDIO_SERVICE) as AudioManager
         observer = object : ContentObserver(Handler(Looper.getMainLooper())){
             override fun onChange(selfChange: Boolean) {
                 super.onChange(selfChange)
+                if(isSetInside){
+                    isSetInside = false;
+                    return
+                }
                 val modelVolume: ModelVolume = ModelVolume();
 
                 var streamType: Int = AudioManager.STREAM_MUSIC
@@ -70,11 +75,15 @@ class AudioService: Service() {
                 modelVolume.notification = audioManager.getStreamVolume(streamType)
                 modelVolume.maxNotification = audioManager.getStreamMaxVolume(streamType)
 
+                if(lastVolume == modelVolume){
+                    return
+                }
                 serviceCoroutineIO.launch {
                     mainRepo.updateFromService(
                         modelVolumeNow = modelVolume
                     )
                 }
+                lastVolume = modelVolume
             }
         }
 
@@ -85,6 +94,7 @@ class AudioService: Service() {
         )
     }
 
+    var isSetInside: Boolean = false
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
         val audioManager: AudioManager = getSystemService(AUDIO_SERVICE) as AudioManager
@@ -97,6 +107,7 @@ class AudioService: Service() {
                 val volume = intent.getIntExtra(VOLUME,0)
                 val streamType = intent.getIntExtra(STREAM_TYPE,AudioManager.STREAM_MUSIC)
                 val maxVolumeType = audioManager.getStreamMaxVolume(streamType)
+                isSetInside = true;
                 audioManager.setStreamVolume(
                     streamType,
                     volume,
@@ -131,7 +142,6 @@ class AudioService: Service() {
                 modelVolume.alarm = volumes
                 modelVolume.maxAlarm = maxVolumes
 
-                Log.d("Masuk Audio Service","Ini masuk ke audio Service")
                 serviceCoroutineIO.launch{
                     mainRepo.updateFromService(
                         modelVolumeNow = modelVolume
@@ -182,7 +192,7 @@ class AudioService: Service() {
             when(streamType){
                 AudioManager.STREAM_MUSIC -> {
                     mainRepo.updateFromService(
-                        modelVolumeNow = mainRepo.currentModelVolume.also {
+                        modelVolumeNow = mainRepo.currentModelVolume.copy().also {
                             it.music = volume
                             it.maxMusic = maxVolumeType
                         }
@@ -190,7 +200,7 @@ class AudioService: Service() {
                 }
                 AudioManager.STREAM_ALARM -> {
                     mainRepo.updateFromService(
-                        modelVolumeNow = mainRepo.currentModelVolume.also {
+                        modelVolumeNow = mainRepo.currentModelVolume.copy().also {
                             it.alarm = volume
                             it.maxAlarm = maxVolumeType
                         }
@@ -198,7 +208,7 @@ class AudioService: Service() {
                 }
                 AudioManager.STREAM_NOTIFICATION -> {
                     mainRepo.updateFromService(
-                        modelVolumeNow = mainRepo.currentModelVolume.also {
+                        modelVolumeNow = mainRepo.currentModelVolume.copy().also {
                             it.notification = volume
                             it.maxNotification = maxVolumeType
                         }

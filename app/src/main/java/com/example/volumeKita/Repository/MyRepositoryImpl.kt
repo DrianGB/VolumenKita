@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
+import android.util.Log
 import androidx.core.content.ContextCompat
 import com.example.volumeKita.Data.ModelVolume
 import com.example.volumeKita.Database.Dao
@@ -43,7 +44,6 @@ class MyRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateFromService(modelVolumeNow: ModelVolume) {
-        currentModelVolume = modelVolumeNow
         _modelVolume.emit(modelVolumeNow)
     }
 }

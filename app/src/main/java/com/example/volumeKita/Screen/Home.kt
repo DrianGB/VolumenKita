@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -136,6 +137,13 @@ fun HomeUi(
                     eventMain(EventMain.onUpTouchAlarm(size,offsetClicked))
                 }
             )
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(15.dp)
+            ) {
+
+            }
         }
 
     }
